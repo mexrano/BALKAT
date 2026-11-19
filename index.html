@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="tr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BALKAT — Online Tatlı Siparişi</title>
+    <meta name="description"
+        content="BALKAT Pastanesi — Kayaşehir'in kat kat ballı pastası. Tatlınızı online seçin, WhatsApp'tan sipariş verin, geldiğinizde hazır olsun.">
+    <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600&family=Playfair+Display:wght@500;600;700&display=swap"
+        rel="stylesheet">
+</head>
+
+<body>
+    <header class="header">
+        <div class="logo-block">
+            <svg xmlns="http://www.w3.org/2000/svg" width="58" height="54" viewBox="0 0 58 54" fill="none"
+                stroke="var(--dark-chocolate)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M27 3 L39 3 L46 13.5 L39 24 L27 24 L20 13.5 Z" />
+                <path d="M7 16 L19 16 L26 26.5 L19 37 L7 37 L0 26.5 Z" />
+                <path d="M27 29 L39 29 L46 39.5 L39 50 L27 50 L20 39.5 Z" />
+            </svg>
+            <span class="logo-text">BALKAT</span>
+        </div>
+
+        <nav class="main-nav">
+            <a href="#menu">Menü</a>
+            <a href="https://www.google.com/maps/search/?api=1&query=Kaya%C5%9Fehir+Merkez+AVM+Ba%C5%9Fak%C5%9Fehir+%C4%B0stanbul"
+                target="_blank" rel="noopener noreferrer">Yol Tarifi</a>
+            <a href="https://wa.me/905353142777" target="_blank" rel="noopener noreferrer">WhatsApp</a>
+        </nav>
+
+        <div class="header-actions">
+            <a href="#order" class="cart-icon-btn" aria-label="Sepet">
+                <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M6.5 8h11l1.5 10a2 2 0 0 1-2 2h-10a2 2 0 0 1-2-2z" />
+                    <path d="M9 8V5.5a3 3 0 0 1 6 0V8" />
+                </svg>
+                <span id="cart-badge" class="cart-badge">0</span>
+            </a>
+            <a href="#order" class="btn-dark btn-header">Sipariş Ver</a>
+        </div>
+    </header>
+
+    <section class="hero">
+        <div class="hero-content">
+            <p class="hero-location">
+                <span class="pin"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                        stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="pin-icon">
+                        <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+                        <circle cx="12" cy="10" r="3"></circle>
+                    </svg></span>Kayaşehir Merkez, Başakşehir
+            </p>
+            <h1 class="hero-title">Kat kat bal, kat kat mutluluk — artık online</h1>
+            <p class="hero-subtitle">Canınızın çektiği tatlıları buradan seçin, siz gelmeden özenle paketleyip hazır
+                edelim</p>
+
+            <div class="hero-buttons">
+                <a href="#menu" class="btn-dark btn-hero">Menüye Göz At →</a>
+            </div>
+        </div>
+    </section>
+
+    <section id="menu" class="popular-section">
+        <div class="section-header">
+            <h2 class="section-title">Bugünün Menüsü</h2>
+            <p class="section-subtitle">Şu anda ön siparişe açık lezzetlerimiz</p>
+        </div>
+        <div class="filters-container" id="filters">
+            <button class="filter-btn active" data-category="all">Tümü</button>
+            <button class="filter-btn" data-category="slices">Dilim &amp; Porsiyon</button>
+            <button class="filter-btn" data-category="half">Yarım Pastalar</button>
+            <button class="filter-btn" data-category="whole">Bütün Pastalar</button>
+        </div>
+        <div class="cards-grid" id="products-grid"></div>
+    </section>
+
+    <section id="order" class="order-section">
+        <div class="order-container">
+            <div class="cart-column">
+                <h2 class="order-title">Gel-Al Sipariş</h2>
+                <p class="order-subtitle">Tatlılarınızı seçin, ne zaman uğrayacağınızı bize bildirin</p>
+                <div class="cart-items-list" id="cart-items"></div>
+                <div class="cart-total">
+                    <span class="total-label">Toplam</span>
+                    <span class="total-price" id="cart-total">₺0</span>
+                </div>
+            </div>
+
+            <div class="form-column">
+                <form class="order-form" id="wa-form">
+                    <input type="text" id="customer-name" placeholder="Adınız Soyadınız" required class="form-input">
+                    <input type="tel" id="customer-phone" placeholder="+90 5XX XXX XX XX" minlength="10" maxlength="18"
+                        required class="form-input">
+                    <div class="form-row">
+                        <input type="date" id="order-date" required class="form-input">
+                        <input type="time" id="order-time" required class="form-input" min="10:00" max="22:00">
+                    </div>
+                    <button type="submit" class="btn-dark btn-submit">WhatsApp ile Sipariş Ver</button>
+                </form>
+            </div>
+        </div>
+    </section>
+
+    <footer class="footer">
+        <a href="#" class="footer-logo">
+            <svg xmlns="http://www.w3.org/2000/svg" width="42" height="39" viewBox="0 0 58 54" fill="none"
+                stroke="var(--dark-chocolate)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M27 3 L39 3 L46 13.5 L39 24 L27 24 L20 13.5 Z" />
+                <path d="M7 16 L19 16 L26 26.5 L19 37 L7 37 L0 26.5 Z" />
+                <path d="M27 29 L39 29 L46 39.5 L39 50 L27 50 L20 39.5 Z" />
+            </svg>
+            <span class="logo-text">BALKAT</span>
+        </a>
+
+        <div class="footer-address">
+            <div class="footer-city">Kayaşehir Merkez, Başakşehir · İstanbul</div>
+            <div class="footer-hours">Her gün · 10:00 – 22:00</div>
+            <div class="footer-credit">
+                Code &amp; Design by <a href="https://t.me/mexrano" target="_blank" class="credit-link">Alisultanov
+                    Isa</a>
+            </div>
+        </div>
+
+        <div class="footer-social">
+            <div class="footer-line"></div>
+            <a href="https://wa.me/905353142777" target="_blank" rel="noopener noreferrer" class="social-link"
+                aria-label="WhatsApp">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M3 21l1.65-3.8a9 9 0 1 1 3.4 2.9L3 21z"></path>
+                    <path d="M9 10a.5.5 0 0 0 1 0V9a.5.5 0 0 0-1 0v1a5 5 0 0 0 5 5h1a.5.5 0 0 0 0-1h-1"></path>
+                </svg>
+            </a>
+            <a href="https://instagram.com/balkat.pastanesi" target="_blank" rel="noopener noreferrer" class="social-link"
+                aria-label="Instagram">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect>
+                    <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path>
+                    <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line>
+                </svg>
+            </a>
+        </div>
+    </footer>
+
+    <script src="data.js"></script>
+    <script src="script.js"></script>
+</body>
+
+</html>

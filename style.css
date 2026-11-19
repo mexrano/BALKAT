@@ -1243,3 +1243,51 @@ body {
         font-size: 9px;
     }
 }
+
+
+/* ===== iOS Safari: tarih ve saat alanlarındaki değer görünmeme / kaybolma düzeltmesi ===== */
+/* Arka plan, kenarlık ve köşe yuvarlaklığı .form-input'tan aynen miras alınır */
+.order-form input.form-input[type="date"],
+.order-form input.form-input[type="time"] {
+    -webkit-appearance: none;
+    appearance: none;
+    display: block;
+    width: 100%;
+    min-width: 0;
+    height: auto;
+    min-height: 48px;
+    line-height: normal;
+    padding-top: 16px;
+    padding-bottom: 16px;
+    text-align: left;
+    color: var(--dark-chocolate);
+    -webkit-text-fill-color: var(--dark-chocolate);
+    opacity: 1;
+}
+
+.order-form input.form-input[type="date"]::-webkit-date-and-time-value,
+.order-form input.form-input[type="time"]::-webkit-date-and-time-value {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    text-align: left;
+    min-height: 1.2em;
+    margin: 0;
+}
+
+.order-form input.form-input[type="date"]::-webkit-datetime-edit,
+.order-form input.form-input[type="time"]::-webkit-datetime-edit {
+    padding: 0;
+    color: var(--dark-chocolate);
+    -webkit-text-fill-color: var(--dark-chocolate);
+}
+
+@media (max-width: 560px) {
+
+    .order-form input.form-input[type="date"],
+    .order-form input.form-input[type="time"] {
+        min-height: 50px;
+        padding-top: 14px;
+        padding-bottom: 14px;
+    }
+}

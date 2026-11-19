@@ -108,23 +108,96 @@ cartItemsContainer.addEventListener('click', (event) => {
     }
 });
 
-const phoneInput = document.getElementById('customer-phone');
-
-phoneInput.addEventListener('input', (e) => {
-    e.target.value = e.target.value.replace(/[^\d+\s-]/g, '');
-});
-
+// ===== Tarih & saat varsayılanları (iOS Safari uyumlu) =====
 const dateInput = document.getElementById('order-date');
+const timeInput = document.getElementById('order-time');
 
-const today = new Date();
-const maxDate = new Date();
-maxDate.setDate(today.getDate() + 14);
+const OPEN_HOUR = 10;  // açılış
+const CLOSE_HOUR = 22; // kapanış
+const MAX_DAYS_AHEAD = 14;
 
-const formatDate = (date) => date.toLocaleDateString('en-CA');
+const pad2 = (n) => String(n).padStart(2, '0');
 
-dateInput.min = formatDate(today);
-dateInput.value = formatDate(today);
-dateInput.max = formatDate(maxDate);
+// Cihazın yerel saatine göre YYYY-MM-DD (toISOString/UTC kullanılmaz)
+const toLocalDate = (d) => `${d.getFullYear()}-${pad2(d.getMonth() + 1)}-${pad2(d.getDate())}`;
+
+// HH:MM, başında sıfırla
+const toLocalTime = (h, m = 0) => `${pad2(h)}:${pad2(m)}`;
+
+// Şu anki yerel saate göre önerilen teslim alma tarihi ve saati
+function getDefaultPickup() {
+    const now = new Date();
+    const pickupDay = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const nextHour = now.getHours() + 1;
+    let hour;
+
+    if (nextHour <= OPEN_HOUR) {
+        // Gece / sabah erken: bugün 10:00
+        hour = OPEN_HOUR;
+    } else if (nextHour < CLOSE_HOUR) {
+        // Çalışma saatleri içinde: bir sonraki tam saat
+        hour = nextHour;
+    } else {
+        // Kapanışa yakın veya kapanıştan sonra: yarın 10:00
+        pickupDay.setDate(pickupDay.getDate() + 1);
+        hour = OPEN_HOUR;
+    }
+
+    const minDay = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const maxDay = new Date(minDay);
+    maxDay.setDate(maxDay.getDate() + MAX_DAYS_AHEAD);
+
+    return {
+        date: toLocalDate(pickupDay),
+        time: toLocalTime(hour),
+        minDate: toLocalDate(minDay),
+        maxDate: toLocalDate(maxDay)
+    };
+}
+
+const DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
+const TIME_RE = /^\d{2}:\d{2}$/;
+
+// force=true: değerleri her durumda yazar.
+// force=false: sadece alan boşsa veya geçersizse doldurur (kullanıcının seçimini ezmez).
+function applyPickupDefaults(force = false) {
+    if (!dateInput || !timeInput) return;
+
+    const d = getDefaultPickup();
+
+    // Önce min/max, sonra value: değer hiçbir zaman sınırların dışında kalmaz
+    dateInput.min = d.minDate;
+    dateInput.max = d.maxDate;
+    timeInput.min = toLocalTime(OPEN_HOUR);
+    timeInput.max = toLocalTime(CLOSE_HOUR);
+
+    const dateInvalid = !DATE_RE.test(dateInput.value)
+        || dateInput.value < d.minDate
+        || dateInput.value > d.maxDate;
+    const timeInvalid = !TIME_RE.test(timeInput.value)
+        || timeInput.value < timeInput.min
+        || timeInput.value > timeInput.max;
+
+    if (force || dateInvalid) {
+        dateInput.setAttribute('value', d.date);
+        dateInput.value = d.date;
+    }
+    if (force || timeInvalid) {
+        timeInput.setAttribute('value', d.time);
+        timeInput.value = d.time;
+    }
+}
+
+// 1) Hemen
+applyPickupDefaults(true);
+// 2) DOM hazır olduğunda ve sayfa tamamen yüklendiğinde (iOS bazen ilk değeri göstermiyor)
+document.addEventListener('DOMContentLoaded', () => applyPickupDefaults(false));
+window.addEventListener('load', () => {
+    applyPickupDefaults(false);
+    setTimeout(() => applyPickupDefaults(false), 300);
+});
+// 3) WhatsApp'tan geri dönüldüğünde (bfcache) alanlar boş kaldıysa tekrar doldur
+window.addEventListener('pageshow', () => applyPickupDefaults(false));
 
 // "2026-11-21" -> "21 Kasım 2026 Cumartesi"
 function formatDateTR(isoDate) {
@@ -148,14 +221,8 @@ orderForm.addEventListener('submit', (event) => {
         return;
     }
 
-    const digitsOnly = phoneInput.value.replace(/\D/g, '');
-    if (digitsOnly.length < 10) {
-        alert('Lütfen geçerli bir telefon numarası girin (en az 10 hane).');
-        return;
-    }
-
     const name = document.getElementById('customer-name').value.trim();
-    const phone = phoneInput.value.trim();
+    const note = document.getElementById('order-note').value.trim();
     const date = formatDateTR(document.getElementById('order-date').value);
     const time = document.getElementById('order-time').value;
 
@@ -168,6 +235,9 @@ orderForm.addEventListener('submit', (event) => {
         totalPrice += lineTotal;
     });
 
+    // Not satırı sadece müşteri bir şey yazdıysa eklenir
+    const noteLine = note ? `\n📝 *Not:* ${note}` : '';
+
     const message =
 `Merhaba ${BRAND_NAME}! 👋
 Web sitenizden gel-al sipariş vermek istiyorum.
@@ -176,20 +246,17 @@ Web sitenizden gel-al sipariş vermek istiyorum.
 ${orderText}
 💰 *Toplam:* ₺${totalPrice}
 
-👤 *Ad Soyad:* ${name}
-📞 *Telefon:* ${phone}
+👤 *İsim:* ${name}
 📅 *Teslim alma tarihi:* ${date}
-⏰ *Saat:* ${time}
+⏰ *Saat:* ${time}${noteLine}
 
 Siparişimi onaylayabilir misiniz? Şimdiden teşekkürler! 🍯`;
 
     const waUrl = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`;
 
-    // Yeni sekmede WhatsApp'ı aç; açılır pencere engellenirse aynı sekmede yönlendir
-    const win = window.open(waUrl, '_blank');
-    if (!win) {
-        window.location.href = waUrl;
-    }
+    // Aynı sekmede yönlendirme: iOS Safari'de açılır pencere engellemesine takılmaz.
+    // Form sıfırlanmadığı için tarih/saat alanları ve sepet olduğu gibi kalır.
+    window.location.href = waUrl;
 });
 
 function updateCartBadge() {
@@ -224,11 +291,4 @@ filtersContainer.addEventListener('click', (event) => {
 });
 
 renderCart();
-const timeInput = document.getElementById('order-time');
-const nextHour = today.getHours() + 1;
 
-if (nextHour < 10 || nextHour >= 22) {
-    timeInput.value = '10:00';
-} else {
-    timeInput.value = `${String(nextHour).padStart(2, '0')}:00`;
-}

@@ -3,17 +3,47 @@
 const WHATSAPP_NUMBER = '905353142777';
 const BRAND_NAME = 'BALKAT';
 
+const priceFormatter = new Intl.NumberFormat('tr-TR', {
+    maximumFractionDigits: 0
+});
+
+function formatPrice(value) {
+    return `₺${priceFormatter.format(Number(value) || 0)}`;
+}
+
+function escapeHtml(value) {
+    return String(value ?? '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+}
+
 function renderProducts(items = products) {
     const grid = document.getElementById('products-grid');
-    const htmlArray = items.map((product) => {
+    const htmlArray = items.map((product, index) => {
+        const id = escapeHtml(product.id);
+        const name = escapeHtml(product.name);
+        const image = escapeHtml(product.image);
+        const isAvailable = product.available !== false;
+        const loading = index < 4 ? 'eager' : 'lazy';
+        const priceText = escapeHtml(formatPrice(product.price));
+
         return `
-            <article class="card">
-                <img src="${product.image}" alt="${product.name}" class="card-image">
+            <article class="card" data-id="${id}" data-available="${isAvailable}" aria-labelledby="p-${id}-title">
+                <div class="card-media">
+                    <img class="card-image" src="${image}"
+                         alt="${name}" width="800" height="800"
+                         loading="${loading}" decoding="async">
+                    <span class="card-badge"${isAvailable ? ' hidden' : ''}>Tükendi</span>
+                </div>
                 <div class="card-content">
-                    <h3 class="card-title">${product.name}</h3>
+                    <h3 class="card-title" id="p-${id}-title">${name}</h3>
                     <div class="card-bottom">
-                        <span class="card-price">₺${product.price}</span>
-                        <button class="btn-add" data-id="${product.id}" aria-label="Sepete ekle">+</button>
+                        <span class="card-price">${priceText}</span>
+                        <button class="btn-add" type="button" data-id="${id}"
+                                aria-label="«${name}» sepete ekle"${isAvailable ? '' : ' disabled'}>+</button>
                     </div>
                 </div>
             </article>
@@ -28,6 +58,7 @@ let cart = [];
 
 function addToCart(productId) {
     const product = products.find(p => p.id === productId);
+    if (!product || product.available === false) return;
     const itemInCart = cart.find(item => item.id === productId);
 
     if (itemInCart) {
@@ -42,10 +73,10 @@ function addToCart(productId) {
 const gridElement = document.getElementById('products-grid');
 
 gridElement.addEventListener('click', (event) => {
-    if (event.target.classList.contains('btn-add')) {
-        const productId = Number(event.target.dataset.id);
-        addToCart(productId);
-    }
+    const btn = event.target.closest('.btn-add');
+    if (!btn || btn.disabled) return;
+    const productId = Number(btn.dataset.id);
+    addToCart(productId);
 });
 
 function renderCart() {
@@ -54,23 +85,44 @@ function renderCart() {
 
     if (cart.length === 0) {
         cartContainer.innerHTML = '<div class="empty-cart-message">Sepetiniz henüz boş.<br>Yukarıdaki menüden tatlı ekleyebilirsiniz.</div>';
-        totalContainer.textContent = '₺0';
+        totalContainer.textContent = formatPrice(0);
         updateCartBadge();
         return;
     }
 
     const htmlArray = cart.map(item => {
+        const id = escapeHtml(item.id);
+        const name = escapeHtml(item.name);
+        const image = escapeHtml(item.image);
+        const unitPrice = escapeHtml(formatPrice(item.price));
+        const lineTotal = escapeHtml(formatPrice(item.price * item.quantity));
+        const qty = escapeHtml(item.quantity);
+
         return `
-            <div class="cart-item">
-                <img src="${item.image}" alt="${item.name}" class="cart-item-img">
+            <div class="cart-item" data-id="${id}">
+                <img src="${image}" alt="${name}" width="60" height="60" class="cart-item-img" loading="lazy" decoding="async">
                 <div class="cart-item-info">
-                    <span class="cart-item-name">${item.name}</span>
-                    <span class="cart-item-price">₺${item.price}</span>
+                    <span class="cart-item-name">${name}</span>
+                    <div class="cart-item-prices">
+                        <span class="cart-item-price">${unitPrice} / adet</span>
+                        <span class="cart-item-subtotal">${lineTotal}</span>
+                    </div>
                 </div>
-                <div class="quantity-controls">
-                    <button class="btn-qty btn-minus" data-id="${item.id}">-</button>
-                    <span class="qty-value">${item.quantity}</span>
-                    <button class="btn-qty btn-plus" data-id="${item.id}">+</button>
+                <div class="cart-item-actions">
+                    <div class="quantity-controls">
+                        <button class="btn-qty btn-minus" type="button" data-id="${id}" aria-label="«${name}» miktarını azalt">−</button>
+                        <span class="qty-value">${qty}</span>
+                        <button class="btn-qty btn-plus" type="button" data-id="${id}" aria-label="«${name}» miktarını artır">+</button>
+                    </div>
+                    <button class="btn-remove" type="button" data-id="${id}" aria-label="«${name}» ürününü sepetten kaldır">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <polyline points="3 6 5 6 21 6"></polyline>
+                            <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"></path>
+                            <path d="M10 11v6"></path>
+                            <path d="M14 11v6"></path>
+                            <path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"></path>
+                        </svg>
+                    </button>
                 </div>
             </div>
         `;
@@ -82,30 +134,33 @@ function renderCart() {
         return sum + (item.price * item.quantity);
     }, 0);
 
-    totalContainer.textContent = `₺${totalPrice}`;
+    totalContainer.textContent = formatPrice(totalPrice);
     updateCartBadge();
 }
 
 const cartItemsContainer = document.getElementById('cart-items');
 
 cartItemsContainer.addEventListener('click', (event) => {
-    if (event.target.classList.contains('btn-qty')) {
-        const productId = Number(event.target.dataset.id);
-        const itemInCart = cart.find(item => item.id === productId);
+    const btn = event.target.closest('button');
+    if (!btn) return;
+    const productId = Number(btn.dataset.id);
+    const itemInCart = cart.find(item => item.id === productId);
+    if (!itemInCart) return;
 
-        if (!itemInCart) return;
-
-        if (event.target.classList.contains('btn-plus')) {
-            itemInCart.quantity++;
-        } else if (event.target.classList.contains('btn-minus')) {
-            itemInCart.quantity--;
-            if (itemInCart.quantity === 0) {
-                cart = cart.filter(item => item.id !== productId);
-            }
+    if (btn.classList.contains('btn-plus')) {
+        itemInCart.quantity++;
+    } else if (btn.classList.contains('btn-minus')) {
+        itemInCart.quantity--;
+        if (itemInCart.quantity <= 0) {
+            cart = cart.filter(item => item.id !== productId);
         }
-
-        renderCart();
+    } else if (btn.classList.contains('btn-remove')) {
+        cart = cart.filter(item => item.id !== productId);
+    } else {
+        return;
     }
+
+    renderCart();
 });
 
 // ===== Tarih & saat varsayılanları (iOS Safari uyumlu) =====
@@ -231,7 +286,7 @@ orderForm.addEventListener('submit', (event) => {
 
     cart.forEach((item, index) => {
         const lineTotal = item.price * item.quantity;
-        orderText += `${index + 1}. ${item.name} × ${item.quantity} — ₺${lineTotal}\n`;
+        orderText += `${index + 1}. ${item.name} × ${item.quantity} — ${formatPrice(lineTotal)}\n`;
         totalPrice += lineTotal;
     });
 
@@ -244,7 +299,7 @@ Web sitenizden gel-al sipariş vermek istiyorum.
 
 🛒 *Siparişim:*
 ${orderText}
-💰 *Toplam:* ₺${totalPrice}
+💰 *Toplam:* ${formatPrice(totalPrice)}
 
 👤 *İsim:* ${name}
 📅 *Teslim alma tarihi:* ${date}

@@ -304,15 +304,63 @@ h3,
     transition: transform 0.2s ease;
 }
 
-.card:hover {
-    transform: translateY(-4px);
+@media (hover: hover) {
+    .card:hover {
+        transform: translateY(-4px);
+    }
+}
+
+.card-media {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 1 / 1;
+    overflow: hidden;
+    background-color: var(--pale-beige);
 }
 
 .card-image {
     width: 100%;
+    height: 100%;
     aspect-ratio: 1 / 1;
     object-fit: cover;
     display: block;
+    transition: filter 0.2s ease, opacity 0.2s ease;
+}
+
+.card-badge {
+    position: absolute;
+    top: 12px;
+    left: 12px;
+    z-index: 2;
+    background-color: rgba(63, 32, 11, 0.88);
+    color: var(--milk-white);
+    font-family: 'Montserrat', sans-serif;
+    font-size: 12px;
+    font-weight: 600;
+    line-height: 1.2;
+    padding: 6px 10px;
+    border-radius: 999px;
+    letter-spacing: 0.2px;
+    pointer-events: none;
+}
+
+.card-badge[hidden] {
+    display: none !important;
+}
+
+.card[data-available="false"] .card-image {
+    filter: grayscale(100%);
+    opacity: 0.55;
+}
+
+.card[data-available="false"] .card-price {
+    opacity: 0.65;
+}
+
+.card[data-available="false"] .btn-add,
+.btn-add:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
 }
 
 .card-content {
@@ -327,14 +375,21 @@ h3,
     font-size: 16px;
     font-weight: 500;
     line-height: 1.35;
+    min-height: 2.7em;
     color: var(--dark-chocolate);
     margin-bottom: 14px;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
 }
 
 .card-bottom {
     display: flex;
     justify-content: space-between;
     align-items: center;
+    gap: 8px;
     margin-top: auto;
 }
 
@@ -343,25 +398,43 @@ h3,
     font-size: 17px;
     font-weight: 600;
     color: var(--dark-chocolate);
+    white-space: nowrap;
 }
 
 .btn-add {
-    width: 36px;
-    height: 36px;
+    width: 44px;
+    height: 44px;
+    min-width: 44px;
+    min-height: 44px;
+    flex-shrink: 0;
     border-radius: 50%;
     border: none;
     background-color: var(--pale-beige);
     color: var(--dark-chocolate);
-    font-size: 20px;
-    display: flex;
+    font-size: 22px;
+    line-height: 1;
+    display: inline-flex;
     align-items: center;
     justify-content: center;
     cursor: pointer;
-    transition: background-color 0.2s ease;
+    transition: background-color 0.2s ease, transform 0.12s ease;
+    touch-action: manipulation;
 }
 
-.btn-add:hover {
+@media (hover: hover) {
+    .btn-add:hover:not(:disabled) {
+        background-color: var(--soft-caramel);
+    }
+}
+
+.btn-add:active:not(:disabled) {
     background-color: var(--soft-caramel);
+    transform: scale(0.94);
+}
+
+.btn-add:focus-visible {
+    outline: 2px solid var(--dark-chocolate);
+    outline-offset: 2px;
 }
 
 .order-section {
@@ -424,12 +497,16 @@ h3,
 .cart-item {
     display: flex;
     align-items: center;
-    gap: 15px;
+    gap: 14px;
+    flex-wrap: wrap;
 }
 
 .cart-item-img {
     width: 60px;
     height: 60px;
+    min-width: 60px;
+    min-height: 60px;
+    flex-shrink: 0;
     border-radius: 10px;
     object-fit: cover;
 }
@@ -437,44 +514,128 @@ h3,
 .cart-item-info {
     display: flex;
     flex-direction: column;
-    flex-grow: 1;
+    gap: 4px;
+    flex: 1 1 140px;
+    min-width: 0;
 }
 
 .cart-item-name {
     font-size: 15px;
     color: var(--dark-chocolate);
-    font-weight: bold;
+    font-weight: 600;
+    line-height: 1.3;
+}
+
+.cart-item-prices {
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+    flex-wrap: wrap;
 }
 
 .cart-item-price {
-    font-size: 14px;
+    font-size: 13px;
     color: var(--warm-brown);
+    opacity: 0.85;
+}
+
+.cart-item-subtotal {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--dark-chocolate);
+}
+
+.cart-item-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-left: auto;
 }
 
 .quantity-controls {
-    display: flex;
+    display: inline-flex;
     align-items: center;
-    gap: 10px;
+    gap: 4px;
     background-color: var(--pale-beige);
-    border-radius: 20px;
-    padding: 5px 10px;
+    border-radius: 22px;
+    padding: 0;
 }
 
 .btn-qty {
     background: none;
     border: none;
     font-size: 18px;
+    font-weight: 600;
     color: var(--dark-chocolate);
     cursor: pointer;
-    width: 20px;
+    width: 44px;
+    height: 44px;
+    min-width: 44px;
+    min-height: 44px;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: background-color 0.2s ease, transform 0.12s ease;
+    touch-action: manipulation;
+}
+
+@media (hover: hover) {
+    .btn-qty:hover {
+        background-color: var(--soft-caramel);
+    }
+}
+
+.btn-qty:active {
+    background-color: var(--soft-caramel);
+    transform: scale(0.94);
+}
+
+.btn-qty:focus-visible {
+    outline: 2px solid var(--dark-chocolate);
+    outline-offset: 2px;
 }
 
 .qty-value {
     font-size: 14px;
     color: var(--dark-chocolate);
-    font-weight: bold;
-    min-width: 15px;
+    font-weight: 700;
+    min-width: 20px;
     text-align: center;
+}
+
+.btn-remove {
+    width: 44px;
+    height: 44px;
+    min-width: 44px;
+    min-height: 44px;
+    border-radius: 50%;
+    border: 1px solid var(--pale-beige);
+    background-color: transparent;
+    color: var(--warm-brown);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease, transform 0.12s ease;
+    touch-action: manipulation;
+}
+
+@media (hover: hover) {
+    .btn-remove:hover {
+        background-color: var(--pale-beige);
+        color: var(--dark-chocolate);
+    }
+}
+
+.btn-remove:active {
+    background-color: var(--soft-caramel);
+    transform: scale(0.94);
+}
+
+.btn-remove:focus-visible {
+    outline: 2px solid var(--dark-chocolate);
+    outline-offset: 2px;
 }
 
 .cart-total {
@@ -939,18 +1100,14 @@ body {
     }
 
     .card-title {
-        font-size: 13px;
+        font-size: 15px;
+        line-height: 1.35;
+        min-height: 2.7em;
         margin-bottom: 10px;
     }
 
     .card-price {
         font-size: 15px;
-    }
-
-    .btn-add {
-        width: 32px;
-        height: 32px;
-        font-size: 18px;
     }
 
     .order-section {
@@ -967,16 +1124,11 @@ body {
     }
 
     .cart-item {
-        gap: 10px;
-    }
-
-    .cart-item-img {
-        width: 48px;
-        height: 48px;
+        gap: 12px;
     }
 
     .cart-item-name {
-        font-size: 13px;
+        font-size: 14px;
     }
 
     .form-row {
